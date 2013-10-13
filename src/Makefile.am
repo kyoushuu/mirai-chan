@@ -18,7 +18,8 @@ bin_PROGRAMS = mirai-chan
 
 mirai_chan_SOURCES = \
 	config.vapi \
-	main.vala
+	main.vala \
+	irc-bot.vala
 
 mirai_chan_VALAFLAGS = \
 	--pkg gio-2.0
