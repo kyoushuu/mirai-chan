@@ -88,6 +88,11 @@ public class IRCBot : Object {
 
                 if (line[0] != ':') {
                     command = msg[0];
+
+                    if (command == "PING") {
+                        var sender = msg[1] != null? msg[1][1:msg[1].length] : null;
+                        send_data ("PONG %s".printf (sender));
+                    }
                 } else {
                     command = msg[1];
                 }
