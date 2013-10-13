@@ -69,6 +69,14 @@ public class IRCBot : Object {
         output.put_string ("%s\r\n".printf (data));
     }
 
+    public void join_channel (string channel) {
+        try {
+            send_data ("JOIN #%s".printf (channel));
+        } catch (IOError e) {
+            stderr.printf ("Error: %s\n", e.message);
+        }
+    }
+
     private void* run () {
         string? line, command;
 
