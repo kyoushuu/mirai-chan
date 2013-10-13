@@ -22,8 +22,9 @@ mirai_chan_SOURCES = \
 	irc-bot.vala
 
 mirai_chan_VALAFLAGS = \
-	--pkg gio-2.0
-
+	--pkg gio-2.0 \
+	--thread \
+	--target-glib=2.32
 
 mirai_chan_LDFLAGS = \
 	-Wl,--export-dynamic

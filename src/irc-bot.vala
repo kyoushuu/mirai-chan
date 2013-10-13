@@ -56,6 +56,8 @@ public class IRCBot : Object {
 
             // Set full name
             send_data ("USER %s 0 * :%s".printf (nick, name));
+
+            new Thread<void*> ("read", run);
         } catch (Error e) {
             return false;
         }
@@ -65,6 +67,36 @@ public class IRCBot : Object {
 
     public void send_data (string data) throws IOError {
         output.put_string ("%s\r\n".printf (data));
+    }
+
+    private void* run () {
+        string? line, command;
+
+        line = null;
+
+        while (true) {
+            try {
+                lock (input) {
+                    if (input.is_closed ()) {
+                        break;
+                    }
+
+                    line = input.read_line (null);
+                }
+
+                var msg = line.strip ().split (" ", 3);
+
+                if (line[0] != ':') {
+                    command = msg[0];
+                } else {
+                    command = msg[1];
+                }
+            } catch (IOError e) {
+                stderr.printf ("Error: %s\n", e.message);
+            }
+        }
+
+        return null;
     }
 
 }
