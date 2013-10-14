@@ -35,6 +35,9 @@ public class IRCBot : Object {
     public virtual signal void nick_joined (string channel, string nick) {
     }
 
+    public virtual signal void closed () {
+    }
+
     public IRCBot () {
     }
 
@@ -104,6 +107,16 @@ public class IRCBot : Object {
                     }
 
                     line = input.read_line (null);
+
+                    if (line == null) {
+                        Idle.add (() => {
+                            closed ();
+
+                            return false;
+                        });
+
+                        return null;
+                    }
                 }
 
                 var msg = line.strip ().split (" ", 3);
