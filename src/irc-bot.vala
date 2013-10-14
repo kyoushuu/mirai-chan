@@ -32,6 +32,9 @@ public class IRCBot : Object {
     public virtual signal void privmsg_received (string sender, string receiver, string message) {
     }
 
+    public virtual signal void nick_joined (string channel, string nick) {
+    }
+
     public IRCBot () {
     }
 
@@ -116,6 +119,17 @@ public class IRCBot : Object {
 
                         Idle.add (() => {
                             privmsg_received (sender, receiver, content);
+
+                            return false;
+                        });
+                    } else if (command == "JOIN") {
+                        msg = line.strip ().split (" ", 4);
+
+                        var sender = msg[0];
+                        var channel = msg[2] != null? msg[2][1:msg[2].length] : null;
+
+                        Idle.add (() => {
+                            nick_joined (channel, sender);
 
                             return false;
                         });
