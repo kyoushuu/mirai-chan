@@ -29,6 +29,9 @@ public class IRCBot : Object {
     private DataOutputStream output;
     private SocketConnection conn;
 
+    public virtual signal void privmsg_received (string sender, string receiver, string message) {
+    }
+
     public IRCBot () {
     }
 
@@ -103,6 +106,20 @@ public class IRCBot : Object {
                     }
                 } else {
                     command = msg[1];
+
+                    if (command == "PRIVMSG") {
+                        msg = line.strip ().split (" ", 4);
+
+                        var sender = msg[0] != null? msg[0][1:msg[0].length] : null;
+                        var receiver = msg[2];
+                        var content = msg[3] != null? msg[3][1:msg[3].length] : null;
+
+                        Idle.add (() => {
+                            privmsg_received (sender, receiver, content);
+
+                            return false;
+                        });
+                    }
                 }
             } catch (IOError e) {
                 stderr.printf ("Error: %s\n", e.message);
