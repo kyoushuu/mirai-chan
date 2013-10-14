@@ -83,6 +83,14 @@ public class IRCBot : Object {
         }
     }
 
+    public void quit (string reason) {
+        try {
+            send_data ("QUIT :%s".printf (reason));
+        } catch (IOError e) {
+            stderr.printf ("Error: %s\n", e.message);
+        }
+    }
+
     private void* run () {
         string? line, command;
 
