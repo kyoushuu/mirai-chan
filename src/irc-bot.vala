@@ -172,4 +172,8 @@ public class IRCBot : Object {
         return null;
     }
 
+    public static string get_nick_from_address (string address) {
+        return address.split("!")[0];
+    }
+
 }
