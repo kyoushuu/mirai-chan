@@ -11,7 +11,7 @@ AM_CPPFLAGS = \
 	$(MIRAI_CHAN_CFLAGS)
 
 AM_CFLAGS = \
-	 -Wall \
+	 -w \
 	 -g
 
 bin_PROGRAMS = mirai-chan
