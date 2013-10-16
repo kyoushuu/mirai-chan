@@ -47,29 +47,46 @@ public class IRCBot : Object {
         this.nick = nick;
         this.name = name;
 
+        List<InetAddress> addresses;
+
         try {
             // Resolve hostname to IP address
             var resolver = Resolver.get_default ();
-            var addresses = resolver.lookup_by_name (host, null);
-            var address = addresses.nth_data (0);
+            addresses = resolver.lookup_by_name (host, null);
+        } catch (Error e) {
+            stderr.printf ("Error: %s\n", e.message);
+            return false;
+        }
 
-            // Connect
-            var client = new SocketClient ();
-            conn = client.connect (new InetSocketAddress (address, port));
+        foreach (var address in addresses) {
+            try {
+                // Connect
+                var client = new SocketClient ();
+                conn = client.connect (new InetSocketAddress (address, port));
 
-            input = new DataInputStream (conn.input_stream);
-            output = new DataOutputStream (conn.output_stream);
+                if (conn != null) {
+                    break;
+                }
+            } catch (Error e) {
+                stderr.printf ("Error: %s\n", e.message);
+            }
+        }
 
+        input = new DataInputStream (conn.input_stream);
+        output = new DataOutputStream (conn.output_stream);
+
+        try {
             // Set nickname
             send_data ("NICK %s".printf (nick));
 
             // Set full name
             send_data ("USER %s 0 * :%s".printf (nick, name));
-
-            new Thread<void*> ("read", run);
         } catch (Error e) {
+            stderr.printf ("Error: %s\n", e.message);
             return false;
         }
+
+        new Thread<void*> ("read", run);
 
         return true;
     }
