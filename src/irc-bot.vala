@@ -54,6 +54,14 @@ public class IRCBot : Object {
             quit (args.length > 1? args[1] : "Signing off!");
 
             return;
+        } else if (args[0] == "join") {
+            join_channel (args[1]);
+
+            return;
+        } else if (args[0] == "leave") {
+            leave_channel (args[1]);
+
+            return;
         }
     }
 
