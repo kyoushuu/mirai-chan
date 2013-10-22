@@ -69,6 +69,46 @@ public class IRCBot : Object {
             send_msg (recipient, say_msg);
 
             return;
+        } else if (args[0] == "announce") {
+            var recipients = new string[0];
+            var announce_msgs = new string[0];
+            var notify = true;
+
+            for (var i = 1; i < args.length; i++) {
+                if (args[i] == "-m") {
+                    if (i + 1 >= args.length) {
+                        send_msg (send_to, "Argument for -m is missing");
+
+                        return;
+                    }
+
+                    announce_msgs += args[++i];
+                } else if (args[i] == "-N") {
+                    notify = true;
+                } else if (args[i] == "-n") {
+                    notify = false;
+                } else {
+                    recipients += args[i];
+                }
+            }
+
+            if (announce_msgs.length == 0) {
+                send_msg (send_to, "Message missing. Specify a message to announce using -m option.");
+
+                return;
+            }
+
+            foreach (var recipient in recipients) {
+                if (notify) {
+                    send_msg (recipient, "Message from %s:".printf (send_to));
+                }
+
+                foreach (var announce_msg in announce_msgs) {
+                    send_msg (recipient, announce_msg);
+                }
+            }
+
+            return;
         }
     }
 
