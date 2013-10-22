@@ -30,6 +30,31 @@ public class IRCBot : Object {
     private SocketConnection conn;
 
     public virtual signal void privmsg_received (string sender, string receiver, string message) {
+        var sender_nick = get_nick_from_address (sender);
+        string[] args;
+        string msg, send_to;
+
+        if (message.has_prefix ("%s:".printf (nick)) && receiver[0] == '#') {
+            msg = message["%s:".printf (nick).length:message.length];
+            send_to = receiver;
+        } else if (receiver == nick) {
+            msg = message;
+            send_to = sender_nick;
+        } else {
+            return;
+        }
+
+        try {
+            Shell.parse_argv (msg, out args);
+        } catch (Error e) {
+            return;
+        }
+
+        if (args[0] == "quit") {
+            quit (args.length > 1? args[1] : "Signing off!");
+
+            return;
+        }
     }
 
     public virtual signal void nick_joined (string channel, string nick) {
