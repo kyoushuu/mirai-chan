@@ -136,6 +136,14 @@ public class IRCBot : Object {
         }
     }
 
+    public void leave_channel (string channel) {
+        try {
+            send_data ("PART #%s".printf (channel));
+        } catch (IOError e) {
+            stderr.printf ("Error: %s\n", e.message);
+        }
+    }
+
     public void quit (string reason) {
         try {
             send_data ("QUIT :%s".printf (reason));
