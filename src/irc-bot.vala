@@ -62,6 +62,13 @@ public class IRCBot : Object {
             leave_channel (args[1]);
 
             return;
+        } else if (args[0] == "say") {
+            var recipient = args[1];
+            var say_msg = args[2];
+
+            send_msg (recipient, say_msg);
+
+            return;
         }
     }
 
