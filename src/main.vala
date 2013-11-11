@@ -29,6 +29,7 @@ int main (string[] args)
         var irc_host = key_file.get_string ("IRC", "host");
         var irc_port = (uint16) key_file.get_integer ("IRC", "port");
         var irc_nick = key_file.get_string ("IRC", "nick");
+        var irc_pass = key_file.get_string ("IRC", "pass");
         var irc_name = key_file.get_string ("IRC", "name");
         var irc_channels = key_file.get_string_list ("IRC", "channels");
 
@@ -37,7 +38,7 @@ int main (string[] args)
             main_loop.quit ();
         });
 
-        bot.connect.begin (irc_host, irc_port, irc_nick, irc_name, (obj, res) => {
+        bot.connect.begin (irc_host, irc_port, irc_nick, irc_pass, irc_name, (obj, res) => {
             bot.connect.end (res);
             foreach (var channel in irc_channels) {
                 bot.join_channel (channel);

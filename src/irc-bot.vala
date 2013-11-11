@@ -23,6 +23,7 @@ public class IRCBot : Object {
     public uint16 port { public get; private set; }
 
     public string nick { public get; private set; }
+    public string pass { public get; private set; }
     public string name { public get; private set; }
 
     private DataInputStream input;
@@ -128,10 +129,11 @@ public class IRCBot : Object {
     public IRCBot () {
     }
 
-    public async new bool connect (string host, uint16 port, string nick, string name) {
+    public async new bool connect (string host, uint16 port, string nick, string pass, string name) {
         this.host = host;
         this.port = port;
         this.nick = nick;
+        this.pass = pass;
         this.name = name;
 
         List<InetAddress> addresses;
@@ -168,6 +170,11 @@ public class IRCBot : Object {
 
             // Set full name
             send_data ("USER %s 0 * :%s".printf (nick, name));
+
+            if (pass != null && pass != "") {
+                // Identify with NickServ
+                send_msg ("NickServ", "IDENTIFY %s".printf (pass));
+            }
         } catch (Error e) {
             stderr.printf ("Error: %s\n", e.message);
             return false;
