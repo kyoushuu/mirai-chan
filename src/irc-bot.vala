@@ -67,6 +67,14 @@ public class IRCBot : Object {
             }
 
             return;
+        } else if (args[0] == "do") {
+            try {
+                send_data (args[1]);
+            } catch (IOError e) {
+                stderr.printf ("Error: %s\n", e.message);
+            }
+
+            return;
         } else if (args[0] == "say") {
             var recipient = args[1];
             var say_msg = args[2];
