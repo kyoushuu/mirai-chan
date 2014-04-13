@@ -180,6 +180,7 @@ public class IRCBot : Object {
 
     public void send_data (string data) throws IOError {
         output.put_string ("%s\r\n".printf (data));
+        stdout.printf ("< %s\n", data);
     }
 
     public void send_msg (string recipient, string message) {
@@ -238,6 +239,7 @@ public class IRCBot : Object {
                         return null;
                     }
                 }
+                stdout.printf ("> %s\n", line);
 
                 var msg = line.strip ().split (" ", 3);
 
