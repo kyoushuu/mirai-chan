@@ -30,6 +30,11 @@ public class IRCBot : Object {
     private DataOutputStream output;
     private SocketConnection conn;
 
+    private Cond who_cond = Cond ();
+    private Mutex who_mutex = Mutex ();
+    private string who_nick;
+    private string who_flags;
+
     public virtual signal void privmsg_received (string sender, string receiver, string message) {
         var sender_nick = get_nick_from_address (sender);
         string[] args;
@@ -210,6 +215,14 @@ public class IRCBot : Object {
         }
     }
 
+    public void send_notice (string recipient, string message) {
+        try {
+            send_data ("NOTICE %s :%s".printf(recipient, message));
+        } catch (Error e) {
+            stderr.printf ("Error: %s\n", e.message);
+        }
+    }
+
     public void join_channel (string channel) {
         try {
             send_data ("JOIN #%s".printf (channel));
@@ -303,6 +316,16 @@ public class IRCBot : Object {
 
                             return false;
                         });
+                    } else if (command == "352") {
+                        who_mutex.lock ();
+
+                        msg = line.strip ().split (" ", 10);
+
+                        who_nick = msg[7];
+                        who_flags = msg[8];
+
+                        who_cond.broadcast ();
+                        who_mutex.unlock ();
                     }
                 }
             } catch (IOError e) {
@@ -315,6 +338,35 @@ public class IRCBot : Object {
 
     public static string get_nick_from_address (string address) {
         return address.split("!")[0];
+    }
+
+    public async bool has_identified (string nickname) {
+        SourceFunc callback = has_identified.callback;
+        var flags = "";
+
+        ThreadFunc<Error?> run = () => {
+            who_mutex.lock ();
+            while (who_nick != nickname) {
+                who_cond.wait (who_mutex);
+            }
+            flags = who_flags;
+            who_mutex.unlock ();
+
+            Idle.add((owned) callback);
+            return null;
+        };
+        var thread = new Thread<Error?> ("has_identified", run);
+
+        try {
+            send_data ("WHO %s".printf (nickname));
+        } catch (IOError e) {
+            stderr.printf ("Error: %s\n", e.message);
+        }
+
+        yield;
+        thread.join ();
+
+        return flags.contains ("r");
     }
 
 }
