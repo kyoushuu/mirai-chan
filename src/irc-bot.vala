@@ -56,11 +56,15 @@ public class IRCBot : Object {
 
             return;
         } else if (args[0] == "join") {
-            join_channel (args[1]);
+            for (var i = 1; i < args.length; i++) {
+                join_channel (args[i]);
+            }
 
             return;
         } else if (args[0] == "leave") {
-            leave_channel (args[1]);
+            for (var i = 1; i < args.length; i++) {
+                leave_channel (args[i]);
+            }
 
             return;
         } else if (args[0] == "say") {
