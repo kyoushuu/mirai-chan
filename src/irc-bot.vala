@@ -69,6 +69,13 @@ public class IRCBot : Object {
             send_msg (recipient, say_msg);
 
             return;
+        } else if (args[0] == "act") {
+            var recipient = args[1];
+            var action = args[2];
+
+            send_msg (recipient, "\x01" + "ACTION " + action + "\x01");
+
+            return;
         } else if (args[0] == "announce") {
             var recipients = new string[0];
             var announce_msgs = new string[0];
