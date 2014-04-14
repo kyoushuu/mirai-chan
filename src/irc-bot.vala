@@ -168,6 +168,8 @@ public class IRCBot : Object {
     }
 
     public async new bool connect (string nickname, string realname) {
+        string? line, command;
+
         this.nickname = nickname;
         this.realname = realname;
 
@@ -215,9 +217,39 @@ public class IRCBot : Object {
             return false;
         }
 
-        new Thread<void*> ("read", run);
+        line = null;
 
-        return true;
+        while (true) {
+            try {
+                lock (input) {
+                    if (input.is_closed ()) {
+                        break;
+                    }
+
+                    line = yield input.read_line_async (Priority.DEFAULT);
+
+                    if (line == null) {
+                        return false;
+                    }
+                }
+                stdout.printf ("> %s\n", line);
+
+                var msg = line.strip ().split (" ", 3);
+
+                if (line[0] == ':') {
+                    command = msg[1];
+
+                    if (command == "004") {
+                        new Thread<void*> ("read", run);
+                        return true;
+                    }
+                }
+            } catch (IOError e) {
+                stderr.printf ("Error: %s\n", e.message);
+            }
+        }
+
+        return false;
     }
 
     public void send_data (string data) throws IOError {
