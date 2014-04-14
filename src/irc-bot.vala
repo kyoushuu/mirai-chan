@@ -150,6 +150,9 @@ public class IRCBot : Object {
         }
     }
 
+    public virtual signal void notice_received (string sender, string receiver, string message) {
+    }
+
     public virtual signal void nick_joined (string channel, string nick) {
         if (nick == nickname) {
             channels.append(channel);
@@ -352,6 +355,18 @@ public class IRCBot : Object {
 
                         Idle.add (() => {
                             privmsg_received (sender, receiver, content);
+
+                            return false;
+                        });
+                    } else if (command == "NOTICE") {
+                        msg = line.strip ().split (" ", 4);
+
+                        var sender = msg[0] != null? msg[0][1:msg[0].length] : null;
+                        var receiver = msg[2];
+                        var content = msg[3] != null? msg[3][1:msg[3].length] : null;
+
+                        Idle.add (() => {
+                            notice_received (sender, receiver, content);
 
                             return false;
                         });
