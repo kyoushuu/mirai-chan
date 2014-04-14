@@ -21,10 +21,11 @@ public class IRCBot : Object {
 
     public string host { public get; private set; }
     public uint16 port { public get; private set; }
-
-    public string nick { public get; private set; }
     public string pass { public get; private set; }
-    public string name { public get; private set; }
+
+    public string nickname { public get; private set; }
+    public string realname { public get; private set; }
+    public string nickpass { public get; private set; }
 
     private DataInputStream input;
     private DataOutputStream output;
@@ -40,10 +41,10 @@ public class IRCBot : Object {
         string[] args;
         string msg, send_to;
 
-        if (message.has_prefix ("%s:".printf (nick)) && receiver[0] == '#') {
-            msg = message["%s:".printf (nick).length:message.length];
+        if (message.has_prefix ("%s:".printf (nickname)) && receiver[0] == '#') {
+            msg = message["%s:".printf (nickname).length:message.length];
             send_to = receiver;
-        } else if (receiver == nick) {
+        } else if (receiver == nickname) {
             msg = message;
             send_to = sender_nick;
         } else {
@@ -143,15 +144,16 @@ public class IRCBot : Object {
     public virtual signal void closed () {
     }
 
-    public IRCBot () {
-    }
-
-    public async new bool connect (string host, uint16 port, string nick, string pass, string name) {
+    public IRCBot (string host, uint16 port, string? pass = null) {
         this.host = host;
         this.port = port;
-        this.nick = nick;
         this.pass = pass;
-        this.name = name;
+    }
+
+    public async new bool connect (string nickname, string nickpass, string realname) {
+        this.nickname = nickname;
+        this.nickpass = nickpass;
+        this.realname = realname;
 
         List<InetAddress> addresses;
 
@@ -182,15 +184,20 @@ public class IRCBot : Object {
         output = new DataOutputStream (conn.output_stream);
 
         try {
+            if (pass != null && pass != "") {
+                // Set server password
+                send_data ("PASS %s".printf (pass));
+            }
+
             // Set nickname
-            send_data ("NICK %s".printf (nick));
+            send_data ("NICK %s".printf (nickname));
 
             // Set full name
-            send_data ("USER %s 0 * :%s".printf (nick, name));
+            send_data ("USER %s 0 * :%s".printf (nickname, realname));
 
-            if (pass != null && pass != "") {
+            if (nickpass != null && nickpass != "") {
                 // Identify with NickServ
-                send_msg ("NickServ", "IDENTIFY %s".printf (pass));
+                send_msg ("NickServ", "IDENTIFY %s".printf (nickpass));
             }
         } catch (Error e) {
             stderr.printf ("Error: %s\n", e.message);
