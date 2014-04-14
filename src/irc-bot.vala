@@ -50,6 +50,9 @@ public class IRCBot : Object {
         if (message.has_prefix ("%s:".printf (nickname)) && receiver[0] == '#') {
             msg = message["%s:".printf (nickname).length:message.length];
             send_to = receiver;
+        } else if (message[0] == '!' && receiver[0] == '#') {
+            msg = message[1:message.length];
+            send_to = receiver;
         } else if (receiver == nickname) {
             msg = message;
             send_to = sender_nick;
