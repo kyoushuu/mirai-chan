@@ -38,6 +38,10 @@ public class IRCBot : Object {
     private string who_nick;
     private string who_flags;
 
+    private static string[] commands = {
+        "quit", "join", "leave", "do", "say", "act", "announce"
+    };
+
     public virtual signal void privmsg_received (string sender, string receiver, string message) {
         var sender_nick = get_nick_from_address (sender);
         string[] args;
@@ -56,6 +60,10 @@ public class IRCBot : Object {
         try {
             Shell.parse_argv (msg, out args);
         } catch (Error e) {
+            return;
+        }
+
+        if (!(args[0] in commands)) {
             return;
         }
 
