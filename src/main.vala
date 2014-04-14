@@ -35,16 +35,30 @@ int main (string[] args)
         var irc_channels = key_file.get_string_list ("IRC", "channels");
 
         var bot = new IRCBot (irc_host, irc_port, irc_pass);
+        if (irc_nickpass != null && irc_nickpass != "") {
+            bot.privmsg_received.connect ((sender, receiver, message) => {
+                if (sender == "NickServ" &&
+                    message == "Password accepted - you are now recognized.") {
+                    foreach (var channel in irc_channels) {
+                        bot.join_channel (channel);
+                    }
+                }
+            });
+        }
         bot.closed.connect (() => {
             main_loop.quit ();
         });
 
-        bot.connect.begin (irc_nickname, irc_nickpass, irc_realname, (obj, res) => {
-            bot.connect.end (res);
-            foreach (var channel in irc_channels) {
-                bot.join_channel (channel);
-            }
-        });
+        if (irc_nickpass != null && irc_nickpass != "") {
+            bot.connect.begin (irc_nickname, irc_nickpass, irc_realname);
+        } else {
+            bot.connect.begin (irc_nickname, irc_nickpass, irc_realname, (obj, res) => {
+                bot.connect.end (res);
+                foreach (var channel in irc_channels) {
+                    bot.join_channel (channel);
+                }
+            });
+        }
     } catch (Error e) {
         stderr.printf ("Error: %s\n", e.message);
     }
