@@ -27,6 +27,8 @@ public class IRCBot : Object {
     public string realname { public get; private set; }
     public string nickpass { public get; private set; }
 
+    public List<string> channels;
+
     private DataInputStream input;
     private DataOutputStream output;
     private SocketConnection conn;
@@ -139,6 +141,9 @@ public class IRCBot : Object {
     }
 
     public virtual signal void nick_joined (string channel, string nick) {
+        if (nick == nickname) {
+            channels.append(channel);
+        }
     }
 
     public virtual signal void closed () {
@@ -148,6 +153,8 @@ public class IRCBot : Object {
         this.host = host;
         this.port = port;
         this.pass = pass;
+
+        channels = new List<string> ();
     }
 
     public async new bool connect (string nickname, string nickpass, string realname) {
