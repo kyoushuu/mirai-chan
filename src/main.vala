@@ -36,8 +36,8 @@ int main (string[] args)
 
         var bot = new IRCBot (irc_host, irc_port, irc_pass);
         if (irc_nspass != null && irc_nspass != "") {
-            bot.privmsg_received.connect ((sender, receiver, message) => {
-                if (sender == "NickServ" &&
+            bot.notice_received.connect ((sender, receiver, message) => {
+                if (sender.has_prefix ("NickServ!") &&
                     message == "Password accepted - you are now recognized.") {
                     foreach (var channel in irc_channels) {
                         bot.join_channel (channel);
