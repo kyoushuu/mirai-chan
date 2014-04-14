@@ -25,7 +25,6 @@ public class IRCBot : Object {
 
     public string nickname { public get; private set; }
     public string realname { public get; private set; }
-    public string nickpass { public get; private set; }
 
     public List<string> channels;
 
@@ -168,9 +167,8 @@ public class IRCBot : Object {
         channels = new List<string> ();
     }
 
-    public async new bool connect (string nickname, string nickpass, string realname) {
+    public async new bool connect (string nickname, string realname) {
         this.nickname = nickname;
-        this.nickpass = nickpass;
         this.realname = realname;
 
         List<InetAddress> addresses;
@@ -212,11 +210,6 @@ public class IRCBot : Object {
 
             // Set full name
             send_data ("USER %s 0 * :%s".printf (nickname, realname));
-
-            if (nickpass != null && nickpass != "") {
-                // Identify with NickServ
-                send_msg ("NickServ", "IDENTIFY %s".printf (nickpass));
-            }
         } catch (Error e) {
             stderr.printf ("Error: %s\n", e.message);
             return false;

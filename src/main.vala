@@ -30,12 +30,12 @@ int main (string[] args)
         var irc_port = (uint16) key_file.get_integer ("IRC", "port");
         var irc_pass = key_file.get_string ("IRC", "pass");
         var irc_nickname = key_file.get_string ("IRC", "nickname");
-        var irc_nickpass = key_file.get_string ("IRC", "nickpass");
         var irc_realname = key_file.get_string ("IRC", "realname");
+        var irc_nspass = key_file.get_string ("IRC", "nspass");
         var irc_channels = key_file.get_string_list ("IRC", "channels");
 
         var bot = new IRCBot (irc_host, irc_port, irc_pass);
-        if (irc_nickpass != null && irc_nickpass != "") {
+        if (irc_nspass != null && irc_nspass != "") {
             bot.privmsg_received.connect ((sender, receiver, message) => {
                 if (sender == "NickServ" &&
                     message == "Password accepted - you are now recognized.") {
@@ -49,16 +49,19 @@ int main (string[] args)
             main_loop.quit ();
         });
 
-        if (irc_nickpass != null && irc_nickpass != "") {
-            bot.connect.begin (irc_nickname, irc_nickpass, irc_realname);
-        } else {
-            bot.connect.begin (irc_nickname, irc_nickpass, irc_realname, (obj, res) => {
-                bot.connect.end (res);
+        bot.connect.begin (irc_nickname, irc_realname, (obj, res) => {
+            if (!bot.connect.end (res)) {
+                return;
+            }
+
+            if (irc_nspass != null && irc_nspass != "") {
+                bot.send_msg ("NickServ", "IDENTIFY %s".printf (irc_nspass));
+            } else {
                 foreach (var channel in irc_channels) {
                     bot.join_channel (channel);
                 }
-            });
-        }
+            }
+        });
     } catch (Error e) {
         stderr.printf ("Error: %s\n", e.message);
     }
